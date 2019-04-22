@@ -1,3 +1,21 @@
 h1 {
     color: red;
 }
+
+body {
+    background-color: aqua;
+}
+
+#input-output-div {
+    display: flex;
+}
+
+#input-div {
+    background-color: blueviolet;
+    flex: 0 0 50%;
+}
+
+#output-div {
+    background-color: greenyellow;
+    flex: 1;
+}
