@@ -1,3 +1,6 @@
+module Main exposing (..)
+
+
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
@@ -6,17 +9,19 @@ import Html.Events exposing (..)
 import Http
 import Json.Print
 import Url exposing (Url)
+import Url.Parser exposing ((</>))
 
 
 main : Program () Model Msg
-main = Browser.application
-  { init = init
-  , view = view
-  , update = update
-  , subscriptions = (\_ -> Sub.none)
-  , onUrlRequest = Debug.todo "todo"
-  , onUrlChange = Debug.todo "todo"
-  }
+main =
+  Browser.application
+    { init = init
+    , view = view
+    , update = update
+    , subscriptions = (\_ -> Sub.none)
+    , onUrlRequest = Debug.todo "todo"
+    , onUrlChange = Debug.todo "todo"
+    }
 
 
 init : () -> Url -> Nav.Key -> (Model, Cmd Msg)
@@ -84,3 +89,23 @@ prettify maybeJson =
           Ok prettyJson -> prettyJson
           Err errorMsg -> errorMsg
     Nothing -> ""
+
+
+type Route
+  = JsonPrettifier
+  | Index
+  | Resume
+
+
+routeParser : Url.Parser.Parser (Route -> a) a
+routeParser =
+  let
+    oneOf = Url.Parser.oneOf
+    map = Url.Parser.map
+    s = Url.Parser.s
+  in
+    oneOf
+      [ map JsonPrettifier (s "tools" </> s "jsonprettifier")
+      , map Index (s "index")
+      , map Resume (s "resume")
+      ]
