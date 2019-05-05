@@ -57,6 +57,7 @@ update msg model =
   case msg of
     JsonSubmitted string ->
       ({ model | userInput = Just string }, Cmd.none)
+
     UrlRequested urlRequest ->
       case urlRequest of
         Browser.External string ->
@@ -67,6 +68,7 @@ update msg model =
               ({ model | selectedTab = (routeToTab route) }, Nav.pushUrl model.navigationKey (Url.toString url))
             Nothing ->
               (model, Cmd.none)
+              
     UrlChanged url ->
       (model, Cmd.none) -- TODO
 
