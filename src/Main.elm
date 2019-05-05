@@ -9,7 +9,7 @@ import Html.Events exposing (..)
 import Http
 import Json.Print
 import Url exposing (Url)
-import Url.Parser exposing ((</>))
+import Url.Parser as UP exposing ((</>))
 
 
 main : Program () Model Msg
@@ -19,33 +19,56 @@ main =
     , view = view
     , update = update
     , subscriptions = (\_ -> Sub.none)
-    , onUrlRequest = Debug.todo "todo"
-    , onUrlChange = Debug.todo "todo"
+    , onUrlRequest = UrlRequested
+    , onUrlChange = UrlChanged
     }
 
 
 init : () -> Url -> Nav.Key -> (Model, Cmd Msg)
-init _ url key = (Model Nothing Nothing, Cmd.none)
+init _ url key =
+  (defaultModel key, Cmd.none)
 
 
 type alias Model =
   { userInput: Maybe String
-  , json: Maybe String
+  , selectedTab: Tab
+  , navigationKey: Nav.Key
   }
 
 
+defaultModel : Nav.Key -> Model
+defaultModel key = Model Nothing IndexTab key
+
+
+type Tab
+  = IndexTab
+  | ResumeTab
+  | JsonPrettifierTab
+
+
 type Msg
-  = ChangeJson String
-  | PrettyPrintJson
+  = JsonSubmitted String
+  | UrlRequested Browser.UrlRequest
+  | UrlChanged Url
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    ChangeJson string ->
+    JsonSubmitted string ->
       ({ model | userInput = Just string }, Cmd.none)
-    PrettyPrintJson ->
-      ({ model | json = model.userInput }, Cmd.none)
+    UrlRequested urlRequest ->
+      case urlRequest of
+        Browser.External string ->
+          (model, Nav.load string)
+        Browser.Internal url ->
+          case UP.parse routeParser url of
+            Just route ->
+              ({ model | selectedTab = (routeToTab route) }, Nav.pushUrl model.navigationKey (Url.toString url))
+            Nothing ->
+              (model, Cmd.none)
+    UrlChanged url ->
+      (model, Cmd.none) -- TODO
 
 
 
@@ -54,27 +77,42 @@ view model =
   { title = "Prettify JSON"
   , body =
     [ h1 [] [ text "Paste in some JSON:" ]
+    , pre [] [ text (Debug.toString model.selectedTab) ]
     , div [ id "input-output-div"]
       [ div [ id "input-div" ]
-        [ jsonInput
-        , submitButton
+        [-- [ jsonInput
+        -- , submitButton
         ]
       , div [ id "output-div" ]
-        [ pre [ id "output" ] [ text (prettify model.json) ]
+        [ pre [ id "output" ] [ text (prettify model.userInput) ]
+        ]
+      , ul []
+        [ viewLink "/resume"
+        , viewLink "/index"
+        , viewLink "/jsonprettifier"
+        , viewLink "/reviews/public-opinion"
+        , viewLink "/reviews/shah-of-shahs"
         ]
       ]
     ]
   }
 
+viewLink : String -> Html msg
+viewLink path =
+  li [] [ a [ href path ] [ text path ] ]
 
-jsonInput : Html Msg
-jsonInput =
-  input [ id "input", placeholder "Paste in some JSON...", onInput ChangeJson ] []
+tabs : List Tab
+tabs = [IndexTab, ResumeTab, JsonPrettifierTab]
 
 
-submitButton : Html Msg
-submitButton =
-  button [ id "submit-button", onClick (PrettyPrintJson) ] [ text "Submit" ]
+-- jsonInput : Html Msg
+-- jsonInput =
+--   input [ id "input", placeholder "Paste in some JSON...", onInput ChangeJson ] []
+
+
+-- submitButton : Html Msg
+-- submitButton =
+--   button [ id "submit-button", onClick (PrettyPrintJson) ] [ text "Submit" ]
 
 
 prettify : Maybe String -> String
@@ -97,15 +135,18 @@ type Route
   | Resume
 
 
-routeParser : Url.Parser.Parser (Route -> a) a
+routeParser : UP.Parser (Route -> Route) Route
 routeParser =
-  let
-    oneOf = Url.Parser.oneOf
-    map = Url.Parser.map
-    s = Url.Parser.s
-  in
-    oneOf
-      [ map JsonPrettifier (s "tools" </> s "jsonprettifier")
-      , map Index (s "index")
-      , map Resume (s "resume")
-      ]
+  UP.oneOf
+    [ UP.map JsonPrettifier (UP.s "jsonprettifier")
+    , UP.map Index (UP.s "index")
+    , UP.map Resume (UP.s "resume")
+    ]
+
+
+routeToTab : Route -> Tab
+routeToTab route =
+  case route of
+    JsonPrettifier -> JsonPrettifierTab
+    Index -> IndexTab
+    Resume -> ResumeTab
