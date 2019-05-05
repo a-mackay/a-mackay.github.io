@@ -1,22 +1,26 @@
 import Browser
+import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
 import Json.Print
+import Url exposing (Url)
 
 
 main : Program () Model Msg
-main = Browser.document
+main = Browser.application
   { init = init
   , view = view
   , update = update
   , subscriptions = (\_ -> Sub.none)
+  , onUrlRequest = Debug.todo "todo"
+  , onUrlChange = Debug.todo "todo"
   }
 
 
-init : () -> (Model, Cmd Msg)
-init _ = (Model Nothing Nothing, Cmd.none)
+init : () -> Url -> Nav.Key -> (Model, Cmd Msg)
+init _ url key = (Model Nothing Nothing, Cmd.none)
 
 
 type alias Model =
