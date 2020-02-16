@@ -11,7 +11,7 @@ th {
     padding: 18px;
     border: 1px solid #ddd;
     color: white;
-    background-color: rgb(54, 186, 247);
+    background-color: rgb(26, 57, 124);
 }
 
 td {
@@ -36,6 +36,8 @@ td {
 }
 
 .NavPane {
+    display: flex;
+    flex-direction: column-reverse;
     min-width: 400px;
     min-height: 100%;
     width: 400px;
@@ -46,16 +48,23 @@ td {
     flex-grow: 0;
 }
 
+.NavPaneTitle {
+    font-family: 'Damion', cursive;
+    color: white;
+    font-size: 3em;
+    padding: 20px;
+}
+
 .RightPane {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
     height: 100%;
     overflow: scroll;
 }
 
 .BgTable {
-    flex-grow: 1;
     margin: 50px;
 }
 
@@ -80,4 +89,29 @@ td {
 
 .Pinhead {
     background-image: url("pinhead.png");
+}
+
+.Blacklisted {
+    background-image: url("blacklisted.png");
+}
+
+.Footer {
+    width: 10px;
+    min-width: 10px;
+    min-height: 50px;
+    height: 50px;
+}
+
+@media screen and (max-width: 1000px) {
+    .NavPane {
+        visibility: hidden;
+        display: none;
+    }
+
+    .Icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        background-size: 28px;
+    }
 }

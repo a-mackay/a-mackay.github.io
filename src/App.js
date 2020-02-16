@@ -10,6 +10,7 @@ function App() {
                 <NavPane></NavPane>
                 <div className="RightPane">
                     <BgTable/>
+                    <Footer/>
                 </div>
             </div>
         </div>
@@ -17,7 +18,13 @@ function App() {
 }
 
 function NavPane() {
-    return <div className="NavPane">Hi</div>
+    return (
+        <div className="NavPane">
+            <div className="NavPaneTitle">
+                We don't own enough boardgames
+            </div>
+        </div>
+    )
 }
 
 function BgTable() {
@@ -28,6 +35,7 @@ function BgTable() {
             <tr>
                 <th>Boardgame</th>
                 <th>Weight</th>
+                <th>Owner</th>
             </tr>
             {bgs.map((bg, index) => BgRow(bg, index % 2 === 0))}
         </table>
@@ -36,10 +44,30 @@ function BgTable() {
 
 function BgRow(bg, isOddRow) {
     let className = isOddRow ? "OddTableRow" : "EvenTableRow";
+
+    if (bg.isBlacklisted) {
+        return BlacklistedBgRow(bg, className);
+    } else {
+        return (
+            <tr className={className}>
+                <td>{bg.name}</td>
+                <td>{Icons(bg.complexity)}</td>
+                <td>{bg.owner}</td>
+            </tr>
+        )
+    }
+}
+
+function BlacklistedBgRow(bg, className) {
     return (
         <tr className={className}>
-            <td>{bg.name}</td>
-            <td>{Icons(bg.complexity)}</td>
+            <td>
+                <s>{bg.name}</s>
+            </td>
+            <td>
+                <BlacklistedIcons/>
+            </td>
+            <td>{bg.owner}</td>
         </tr>
     )
 }
@@ -65,13 +93,25 @@ function Icons(complexity) {
         title = "Big Brain"
     } else {
         imageClassName = brain;
-        imageCount = 6;
+        imageCount = 5;
         title = "Gigantic Brain"
     }
 
     return (
         <div className="Icons" title={title}>
             {range(1, imageCount).map(_index => Icon(imageClassName))}
+        </div>
+    )
+}
+
+function Footer() {
+    return <div className="Footer"></div>
+}
+
+function BlacklistedIcons() {
+    return (
+        <div className="Icons" title={"Shelf of Shame"}>
+            {Icon("Blacklisted")}
         </div>
     )
 }
